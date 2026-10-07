@@ -67,15 +67,13 @@ def is_coarse_or_extended(chord):
 def extract_coarse_bits(chord):
     order = 'FRDESW';
     for key in order:
-        idx = chord.find(key)
-        if idx != -1:
-            i = order.find(key)
-            if i == 5:
-                return [i, None]
-            elif i > 2:
-                return [i, i + 1]
-            else:
-                return [i, i]        
+        i = order.index(key)
+        if i == 5:
+            return [i, None]
+        elif i > 2:
+            return [i, i + 1]
+        else:
+            return [i, i]        
 
 
 def is_fine_extended(chord):
@@ -84,7 +82,7 @@ def is_fine_extended(chord):
 def extract_fine_extended_bits(chord):
     order = 'JUKIL';
     for key in order:
-        idx = chord.find(key)
+        idx = chord.index(key)
         if idx != -1:
             if key == 'J':
                 return 0b00001
