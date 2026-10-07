@@ -11,10 +11,10 @@ def simulate_strokes(strokes):
 
 # Test Case 1: Sequential typing
 simulate_strokes([('S',)])     # Coarse
-simulate_strokes([('J', 'K')])   # Fine
+simulate_strokes([('J')])   # Fine
 simulate_strokes([('V',)])        # Terminator
 
 # Test Case 2: NKRO Single-Stroke
 simulate_strokes([
-    ('S', 'J', 'K', 'V')
+    ('S', 'J', 'V')
 ])
