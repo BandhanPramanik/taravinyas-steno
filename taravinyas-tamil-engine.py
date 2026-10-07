@@ -63,7 +63,7 @@ def is_coarse_or_extended(chord):
     else:
         return None 
 
-
+# Format: [Vowel, Consonant]
 def extract_coarse_bits(chord):
     order = 'FRDESW';
     for key in order:
@@ -147,10 +147,10 @@ def q3_phase(chord):
     if EVAL_AS == 'consonant': # q4: Consonant Terminator
         character = renderConsonant(ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED)
     elif EVAL_AS == 'vowel_standalone': # q5: Vowel (Standalone) Terminator
-        XI = 0
+        XI = 0 # not relevant when Alpha = 1
         character = renderVowel(ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, XI)
     elif EVAL_AS == 'vowel_diacritic': # q5: Vowel (Diacritic) Terminator
-        XI = 1
+        XI = 1 # not relevant when Alpha = 1
         character = renderVowel(ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, XI)
     else:
         flush_state()
