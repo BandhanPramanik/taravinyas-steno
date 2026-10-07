@@ -113,6 +113,7 @@ def extract_terminators(chord):
     else:
         return "INVALID"
 
+
 def q0_phase(chord):
     global ALPHA, DFA_STATE, BUFFER_COARSE
     check = is_coarse_or_extended(chord)
@@ -145,13 +146,13 @@ def q3_phase(chord):
     EVAL_AS = extract_terminators(chord)
     character = ""
     if EVAL_AS == 'consonant': # q4: Consonant Terminator
-        character = renderConsonant(ALPHA, BUFFER_COARSE[0], BUFFER_FINE_EXTENDED)
+        print(ALPHA, BUFFER_COARSE[0], BUFFER_FINE_EXTENDED)
     elif EVAL_AS == 'vowel_standalone': # q5: Vowel (Standalone) Terminator
         XI = 0 # not relevant when Alpha = 1
-        character = renderVowel(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
+        print(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
     elif EVAL_AS == 'vowel_diacritic': # q5: Vowel (Diacritic) Terminator
         XI = 1 # not relevant when Alpha = 1
-        character = renderVowel(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
+        print(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
     else:
         flush_state()
         raise KeyError
@@ -164,6 +165,7 @@ def q3_phase(chord):
 def lookup(key):
     global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
     chord = key[0]
+    print(chord)
     if DFA_STATE == 'q0':
         q0_phase(chord)
         if is_fine_extended(chord):
@@ -185,7 +187,3 @@ def lookup(key):
 
 def reverse_lookup(text):
     return []
-
-
-def evaluate_consonants():
-    if alpha == 
