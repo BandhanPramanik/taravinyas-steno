@@ -6,6 +6,6 @@ Clone the repo & run `test-harness.py`.
 
 ---
 
-Dev Notes:
+**Dev Notes:**
 
 Update 1: Guys, it's my bad for debugging minor syntax errors from an LLM. Forgot to ask for a test harness earlier.
