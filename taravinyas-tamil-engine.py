@@ -88,6 +88,22 @@ def extract_fine_extended_bits(chord):
             elif key == 'L':
                 return 0b10000
 
+
+def extract_terminators(chord):
+    consonant = 'V' in chord
+    standalone = 'X' in chord
+    diacritic = 'C' in chord
+    if consonant and (standalone or diacritic):
+        return "INVALID"
+    if standalone and diacritic:
+        return "INVALID"
+    if consonant:
+        return "consonant"
+    if standalone:
+        return "vowel_standalone"
+    if diacritic:
+        return "vowel_diacritic"
+
 def q0_phase(chord):
     global ALPHA, DFA_STATE, BUFFER_COARSE
         check = is_coarse_or_extended(chord)
