@@ -1,5 +1,9 @@
 # Plover Dictionary For Tamil (Taravinyas)
 
+## How to debug
+
+Clone the repo & run `test-harness.py`. 
+
 ---
 
 Dev Notes:
