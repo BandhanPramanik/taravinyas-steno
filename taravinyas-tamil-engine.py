@@ -165,7 +165,6 @@ def q3_phase(chord):
 def lookup(key):
     global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
     chord = key[0]
-    print(chord)
     if DFA_STATE == 'q0':
         q0_phase(chord)
         if is_fine_extended(chord):
