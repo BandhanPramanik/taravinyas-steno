@@ -10,9 +10,9 @@ def simulate_strokes(strokes):
             print(f"Stroke: {str(stroke):<20} -> KEYERROR (Invalid Chord)")
 
 # Test Case 1: Sequential typing
-simulate_strokes([('S',)])     # Coarse
-simulate_strokes([('J',)])   # Fine
-simulate_strokes([('V',)])        # Terminator
+simulate_strokes((('S',),))     # Coarse
+simulate_strokes((('J',),))   # Fine
+simulate_strokes((('V',),))        # Terminator
 
 # Test Case 2: NKRO Single-Stroke
 simulate_strokes([
