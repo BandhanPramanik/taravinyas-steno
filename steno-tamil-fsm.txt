@@ -1,0 +1,17 @@
+digraph finite_state_machine {
+    rankdir=UD;
+    size="8,5"
+        // Invisible start node
+    node [shape = point, color = white, fontcolor = white];start;
+        node [shape = circle, color = black, fontcolor = black];
+    node [shape = doublecircle]; q4, q5;
+    node [shape = circle];q0,q1,q2,q3,q4,q5;
+    start -> q0;
+    q0 -> q1 [label = "Coarse keys"];
+    q1 -> q3 [label = "Fine/Extended keys"];
+    q0 -> q2 [label = "Extended mode"]
+    q2 -> q3 [label = "Fine/Extended keys"];
+	q3 -> q5 [label = "Shift (diacritic mode)\nVowel Terminator"]; 
+	q3 -> q5 [label = "Vowel (standalone) terminator"];
+	q3 -> q4 [label = "Consonant terminator"]
+}
