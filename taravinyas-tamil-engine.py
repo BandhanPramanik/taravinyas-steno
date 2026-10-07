@@ -45,27 +45,48 @@ CONSONANT_LOOKUP_TABLE = [
     None,
 ];
 
-def lookup(key):
-    global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
-    chord = key[0]
-    if DFA_STATE == 'q0':
-        q0_phase(chord)
-        if is_fine_extended(chord):
-            q1_q2_phase(chord)
-        if extract_terminators(chord) != "INVALID":
-            return q3_phase(chord)
-        return ""
-    elif DFA_STATE == 'q1' or DFA_STATE == 'q2':
-        q1_q2_phase(chord)
-        if extract_terminators(chord) != "INVALID":
-            return q3_phase(chord)
-        return ""
-    elif DFA_STATE == 'q3':
-            return q3_phase(chord)
+def is_coarse_or_extended(chord):
+    check = sum(key in chord for key in 'FRDESW')
+    if 'A' in chord and check == 0:
+        return True
+    elif check == 1:
+        return False
     else:
-        flush_state()
-        raise KeyError
+        return None 
 
+
+def extract_coarse_bits(chord):
+    order = 'FRDESW';
+    for key in order:
+        idx = chord.find(key)
+        if idx != -1:
+            i = order.find(key)
+            if i == 5:
+                return [i, None]
+            elif i > 2:
+                return [i, i + 1]
+            else:
+                return [i, i]        
+
+
+def is_fine_extended(chord):
+    check = sum(key in chord for key in 'JUKIL') == 1
+
+def extract_fine_extended_bits(chord):
+    order = 'JUKIL';
+    for key in order:
+        idx = chord.find(key)
+        if idx != -1:
+            if key == 'J':
+                return 0b00001
+            elif key == 'U':
+                return 0b00010
+            elif key == 'K':
+                return 0b00100
+            elif key == 'I':
+                return 0b01100
+            elif key == 'L':
+                return 0b10000
 
 def q0_phase(chord):
     global ALPHA, DFA_STATE, BUFFER_COARSE
@@ -113,6 +134,28 @@ def q3_phase(chord):
     if character == "INVALID":
         raise KeyError
     return character
+
+
+def lookup(key):
+    global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
+    chord = key[0]
+    if DFA_STATE == 'q0':
+        q0_phase(chord)
+        if is_fine_extended(chord):
+            q1_q2_phase(chord)
+        if extract_terminators(chord) != "INVALID":
+            return q3_phase(chord)
+        return ""
+    elif DFA_STATE == 'q1' or DFA_STATE == 'q2':
+        q1_q2_phase(chord)
+        if extract_terminators(chord) != "INVALID":
+            return q3_phase(chord)
+        return ""
+    elif DFA_STATE == 'q3':
+            return q3_phase(chord)
+    else:
+        flush_state()
+        raise KeyError
 
 
 def reverse_lookup(text):
