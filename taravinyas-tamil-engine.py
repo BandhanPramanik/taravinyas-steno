@@ -63,7 +63,7 @@ def is_coarse_or_extended(chord):
     else:
         return None 
 
-# Format: [Vowel, Consonant]
+# Format: [Consonant, Vowel]
 def extract_coarse_bits(chord):
     order = 'FRDESW';
     for key in order:
