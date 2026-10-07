@@ -45,7 +45,10 @@ CONSONANT_LOOKUP_TABLE = [
     None,
 ];
 
-def flush_state():
+# Used to fully flush and reset the global variables.
+# For raising error mid-process, 
+# passing raise_error=True keeps code clean.
+def flush_state(raise_error):
     global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
     DFA_STATE = "q0"
     ALPHA = 0
@@ -53,16 +56,22 @@ def flush_state():
     BUFFER_FINE_EXTENDED = None
     EVAL_AS = None
     XI = 0
+    if raise_error is True:
+        raise KeyError
 
+# Are we pressing a coarse key (False), the extended mode key (True), or something else (None)?
 def is_coarse_or_extended(chord):
     check = sum(key in chord for key in 'FRDESW')
     if 'A' in chord and check == 0:
-        return True
+        return False # Extended
     elif check == 1:
-        return False
+        return True # Coarse
     else:
-        return None 
+        return None # Neither
 
+# Used to extract the coarse bit.
+# Use is_coarse_or_extended() before passing here.
+# Code is strictly for a single coarse key per chord
 # Format: [Consonant, Vowel]
 def extract_coarse_bits(chord):
     order = 'FRDESW';
@@ -75,15 +84,31 @@ def extract_coarse_bits(chord):
         else:
             return [i, i]        
 
+# Are we pressing keys for fine positions/extended character positions? (bool)
+def is_fine_extended(chord, alpha):
+    if alpha == 0:
+        keys = 'JUKIL'
+    else:
+        keys = 'JUK'
+    check = sum(key in chord for key in keys)
+    if check > 1:
+        return None
+    elif check == 1:
+        return True
+    else:
+        return False
 
-def is_fine_extended(chord):
-    return sum(key in chord for key in 'JUKIL') == 1
-
-def extract_fine_extended_bits(chord):
-    order = 'JUKIL';
+# Used to extract the fine/extended bits.
+# Use is_fine_extended()  before passing here.
+# Code is strictly for a single fine/extended key per chord
+def extract_fine_extended_bits(chord, alpha):
+    if alpha == 0:
+        order = 'JUKIL';
+    else:
+        order = 'JUK';
     for key in order:
         idx = chord.index(key)
-        if idx != -1:
+        if alpha == 0:
             if key == 'J':
                 return 0b00001
             elif key == 'U':
@@ -94,16 +119,26 @@ def extract_fine_extended_bits(chord):
                 return 0b01100
             elif key == 'L':
                 return 0b10000
+        else:
+            if key == 'J':
+                return 0b00
+            elif key == 'U':
+                return 0b01
+            elif key == 'K':
+                return 0b10
 
 
+# Do we want to render it as a consonant, a diacritic, or a standalone vowel? Or is the rendering method not clear?
 def extract_terminators(chord):
     consonant = 'V' in chord
     standalone = 'X' in chord
     diacritic = 'C' in chord
+    if not (consonant or standalone or diacritic):
+        return "nothing"
     if consonant and (standalone or diacritic):
         return "INVALID"
     if standalone and diacritic:
-        return "INVALID"
+        return "vowel_extended"
     if consonant:
         return "consonant"
     if standalone:
@@ -113,34 +148,32 @@ def extract_terminators(chord):
     else:
         return "INVALID"
 
-
+# Transition from q0: Take the coarse keys / extended mode
 def q0_phase(chord):
     global ALPHA, DFA_STATE, BUFFER_COARSE
     check = is_coarse_or_extended(chord)
-    if check is True: # Extended
-        ALPHA = 1
-        DFA_STATE = 'q2'
-    elif check is False: # Coarse
+    if check is True: # Coarse
         ALPHA = 0
         BUFFER_COARSE = extract_coarse_bits(chord)
         DFA_STATE = 'q1' 
-    else:
-        flush_state()
-        raise KeyError
-    return ""
+    elif check is False: # Extended
+        ALPHA = 1
+        DFA_STATE = 'q2'
 
-
+# Transition from q1 & q2: Take the fine/extended mode keys
 def q1_q2_phase(chord):
-    global BUFFER_FINE_EXTENDED, DFA_STATE
-    check = is_fine_extended(chord)
-    if check:
-       BUFFER_FINE_EXTENDED = extract_fine_extended_bits(chord)
+    global BUFFER_FINE_EXTENDED, DFA_STATE, ALPHA
+    check = is_fine_extended(chord, ALPHA)
+    if check is True:
+       BUFFER_FINE_EXTENDED = extract_fine_extended_bits(chord, ALPHA)
        DFA_STATE = 'q3'
-       return ""
+    elif check is None:
+       flush_state(True)
     else:
-       flush_state()
-       raise KeyError
+        DFA_STATE = 'q3'
 
+
+# Transition from q3: Find terminators and render consonant
 def q3_phase(chord):
     global EVAL_AS, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, XI
     EVAL_AS = extract_terminators(chord)
@@ -153,36 +186,48 @@ def q3_phase(chord):
     elif EVAL_AS == 'vowel_diacritic': # q5: Vowel (Diacritic) Terminator
         XI = 1 # not relevant when Alpha = 1
         print(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
-    else:
-        flush_state()
-        raise KeyError
-    flush_state()
+    elif EVAL_AS == 'vowel_extended': 
+        print(ALPHA, BUFFER_FINE_EXTENDED)
+    elif EVAL_AS == 'INVALID':
+        flush_state(True)
+    flush_state(False)
     if character == "INVALID":
         raise KeyError
     return character
 
-
 def lookup(key):
     global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
     chord = key[0]
-    print(chord, key)
+    print(DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI)
     if DFA_STATE == 'q0':
+        print("q0")
         q0_phase(chord)
-        if is_fine_extended(chord):
+        print(is_fine_extended(chord, ALPHA))
+        if is_fine_extended(chord, ALPHA) is None:
+            flush_state(True)
+        elif is_fine_extended(chord, ALPHA) is True:
+            print("q1/q2")
             q1_q2_phase(chord)
-        if extract_terminators(chord) != "INVALID":
-            return q3_phase(chord)
+            print(extract_terminators(chord))
+            if extract_terminators(chord) == "INVALID":
+                flush_state(True)
+            elif extract_terminators(chord) != "nothing":
+                print("q3")
+                return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q1' or DFA_STATE == 'q2':
         q1_q2_phase(chord)
-        if extract_terminators(chord) != "INVALID":
+        print(extract_terminators(chord))
+        if extract_terminators(chord) == "INVALID":
+            flush_state(True)
+        else:
+            print("q3")
             return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q3':
             return q3_phase(chord)
     else:
-        flush_state()
-        raise KeyError
+        flush_state(True)
 
 
 def reverse_lookup(text):
