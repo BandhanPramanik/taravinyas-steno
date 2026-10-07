@@ -45,6 +45,15 @@ CONSONANT_LOOKUP_TABLE = [
     None,
 ];
 
+def flush_state():
+    global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
+    DFA_STATE = "q0"
+    ALPHA = 0
+    BUFFER_COARSE = None
+    BUFFER_FINE_EXTENDED = None
+    EVAL_AS = None
+    XI = 0
+
 def is_coarse_or_extended(chord):
     check = sum(key in chord for key in 'FRDESW')
     if 'A' in chord and check == 0:
