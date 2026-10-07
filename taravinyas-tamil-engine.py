@@ -79,7 +79,7 @@ def extract_coarse_bits(chord):
 
 
 def is_fine_extended(chord):
-    check = sum(key in chord for key in 'JUKIL') == 1
+    return sum(key in chord for key in 'JUKIL') == 1
 
 def extract_fine_extended_bits(chord):
     order = 'JUKIL';
@@ -115,30 +115,30 @@ def extract_terminators(chord):
 
 def q0_phase(chord):
     global ALPHA, DFA_STATE, BUFFER_COARSE
-        check = is_coarse_or_extended(chord)
-        if check == 1: # Extended
-            ALPHA = 1
-            DFA_STATE = 'q2'
-        elif check == 0: # Coarse
-            ALPHA = 0
-            BUFFER_COARSE = extract_coarse_bits(chord)
-            DFA_STATE = 'q1' 
-        else:
-            flush_state()
-            raise KeyError
-        return ""
+    check = is_coarse_or_extended(chord)
+    if check is True: # Extended
+        ALPHA = 1
+        DFA_STATE = 'q2'
+    elif check is False: # Coarse
+        ALPHA = 0
+        BUFFER_COARSE = extract_coarse_bits(chord)
+        DFA_STATE = 'q1' 
+    else:
+        flush_state()
+        raise KeyError
+    return ""
 
 
 def q1_q2_phase(chord):
     global BUFFER_FINE_EXTENDED, DFA_STATE
-        check = is_fine_extended(chord)
-        if check:
-            BUFFER_FINE_EXTENDED = extract_fine_extended_bits(chord)
-            DFA_STATE = 'q3'
-            return ""
-        else:
-            flush_state()
-            raise KeyError
+    check = is_fine_extended(chord)
+    if check:
+       BUFFER_FINE_EXTENDED = extract_fine_extended_bits(chord)
+       DFA_STATE = 'q3'
+       return ""
+    else:
+       flush_state()
+       raise KeyError
 
 def q3_phase(chord):
     global EVAL_AS, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, XI
