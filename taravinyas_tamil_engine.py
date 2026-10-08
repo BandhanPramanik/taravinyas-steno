@@ -198,30 +198,22 @@ def q3_phase(chord):
 def lookup(key):
     global DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI
     chord = key[0]
-    print(DFA_STATE, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, EVAL_AS, XI)
     if DFA_STATE == 'q0':
-        print("q0")
         q0_phase(chord)
-        print(is_fine_extended(chord, ALPHA))
         if is_fine_extended(chord, ALPHA) is None:
             flush_state(True)
         elif is_fine_extended(chord, ALPHA) is True:
-            print("q1/q2")
             q1_q2_phase(chord)
-            print(extract_terminators(chord))
             if extract_terminators(chord) == "INVALID":
                 flush_state(True)
             elif extract_terminators(chord) != "nothing":
-                print("q3")
                 return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q1' or DFA_STATE == 'q2':
         q1_q2_phase(chord)
-        print(extract_terminators(chord))
         if extract_terminators(chord) == "INVALID":
             flush_state(True)
-        else:
-            print("q3")
+        elif extract_terminators(chord) != "nothing":
             return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q3':
