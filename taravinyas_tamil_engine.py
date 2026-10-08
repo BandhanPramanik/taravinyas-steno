@@ -107,25 +107,25 @@ def extract_fine_extended_bits(chord, alpha):
     else:
         order = 'JUK';
     for key in order:
-        idx = chord.index(key)
-        if alpha == 0:
-            if key == 'J':
-                return 0b00001
-            elif key == 'U':
-                return 0b00010
-            elif key == 'K':
-                return 0b00100
-            elif key == 'I':
-                return 0b01100
-            elif key == 'L':
-                return 0b10000
-        else:
-            if key == 'J':
-                return 0b00
-            elif key == 'U':
-                return 0b01
-            elif key == 'K':
-                return 0b10
+        if key in chord:
+            if alpha == 0:
+                if key == 'J':
+                    return 0b00001
+                elif key == 'U':
+                    return 0b00010
+                elif key == 'K':
+                    return 0b00100
+                elif key == 'I':
+                    return 0b01100
+                elif key == 'L':
+                    return 0b10000
+            else:
+                if key == 'J':
+                    return 0b00
+                elif key == 'U':
+                    return 0b01
+                elif key == 'K':
+                    return 0b10
 
 
 # Do we want to render it as a consonant, a diacritic, or a standalone vowel? Or is the rendering method not clear?
