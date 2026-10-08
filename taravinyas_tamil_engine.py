@@ -45,6 +45,7 @@ CONSONANT_LOOKUP_TABLE = [
     None,
 ];
 
+
 # Used to fully flush and reset the global variables.
 # For raising error mid-process, 
 # passing raise_error=True keeps code clean.
@@ -76,13 +77,15 @@ def is_coarse_or_extended(chord):
 def extract_coarse_bits(chord):
     order = 'FRDESW';
     for key in order:
-        i = order.index(key)
-        if i == 5:
-            return [i, None]
-        elif i > 2:
-            return [i, i + 1]
-        else:
-            return [i, i]        
+        if key in chord:
+            i = order.index(key)
+            print(i)
+            if i == 5:
+                return [i, None]
+            elif i > 2:
+                return [i, i + 1]
+            else:
+                return [i, i]        
 
 # Are we pressing keys for fine positions/extended character positions? (bool)
 def is_fine_extended(chord, alpha):
@@ -129,7 +132,7 @@ def extract_fine_extended_bits(chord, alpha):
 
 
 # Do we want to render it as a consonant, a diacritic, or a standalone vowel? Or is the rendering method not clear?
-def extract_terminators(chord):
+def extract_terminators(chord, alpha):
     consonant = 'V' in chord
     standalone = 'X' in chord
     diacritic = 'C' in chord
@@ -137,7 +140,7 @@ def extract_terminators(chord):
         return "nothing"
     if consonant and (standalone or diacritic):
         return "INVALID"
-    if standalone and diacritic:
+    if alpha and (standalone or diacritic):
         return "vowel_extended"
     if consonant:
         return "consonant"
@@ -176,10 +179,13 @@ def q1_q2_phase(chord):
 # Transition from q3: Find terminators and render consonant
 def q3_phase(chord):
     global EVAL_AS, ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED, XI
-    EVAL_AS = extract_terminators(chord)
+    EVAL_AS = extract_terminators(chord, ALPHA)
     character = ""
     if EVAL_AS == 'consonant': # q4: Consonant Terminator
-        print(ALPHA, BUFFER_COARSE[0], BUFFER_FINE_EXTENDED)
+        if ALPHA == 0:
+            print(ALPHA, BUFFER_COARSE[0], BUFFER_FINE_EXTENDED)
+        else:
+            print(ALPHA, BUFFER_COARSE, BUFFER_FINE_EXTENDED)
     elif EVAL_AS == 'vowel_standalone': # q5: Vowel (Standalone) Terminator
         XI = 0 # not relevant when Alpha = 1
         print(ALPHA, BUFFER_COARSE[1], BUFFER_FINE_EXTENDED, XI)
@@ -204,16 +210,16 @@ def lookup(key):
             flush_state(True)
         elif is_fine_extended(chord, ALPHA) is True:
             q1_q2_phase(chord)
-            if extract_terminators(chord) == "INVALID":
+            if extract_terminators(chord, ALPHA) == "INVALID":
                 flush_state(True)
-            elif extract_terminators(chord) != "nothing":
+            elif extract_terminators(chord, ALPHA) != "nothing":
                 return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q1' or DFA_STATE == 'q2':
         q1_q2_phase(chord)
-        if extract_terminators(chord) == "INVALID":
+        if extract_terminators(chord, ALPHA) == "INVALID":
             flush_state(True)
-        elif extract_terminators(chord) != "nothing":
+        elif extract_terminators(chord, ALPHA) != "nothing":
             return q3_phase(chord)
         return ""
     elif DFA_STATE == 'q3':
